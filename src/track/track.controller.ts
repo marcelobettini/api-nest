@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { iTrack } from './track.interface';
 
@@ -8,5 +8,10 @@ export class TrackController {
   @Get()
   getTracks(): Promise<iTrack[]> {
     return this.trackService.getTracks();
+  }
+
+  @Get(':id')
+  getTrackById(@Param('id') id: number): Promise<iTrack> {
+    return this.trackService.getTrackById(id);
   }
 }
