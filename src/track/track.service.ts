@@ -9,9 +9,32 @@ export class TrackService {
     return tracks;
   }
   async getTrackById(id: number): Promise<iTrack> {
-    console.log(id);
     const res = await fetch(base_url + id);
     const track = await res.json();
     return track;
   }
+
+
+  async addTrack(track: iTrack): Promise<iTrack> {
+    const id = await this.createId();
+    const newTrack = { ...track, id };
+    const res = await fetch(base_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newTrack),
+    });
+    const parsed = await res.json();
+    return parsed;
+  }
+
+  private async createId(): Promise<number> {
+    const tracks = await this.getTracks();
+    const lastTrack = tracks[tracks.length - 1];
+    const id = Number(lastTrack.id) + 1;
+    return id;
+  }
+
+
 }
