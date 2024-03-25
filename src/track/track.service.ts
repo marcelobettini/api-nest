@@ -8,16 +8,14 @@ export class TrackService {
     const tracks = await res.json();
     return tracks;
   }
-  async getTrackById(id: number): Promise<iTrack> {
+  async getTrackById(id: string): Promise<iTrack> {
     const res = await fetch(base_url + id);
     const track = await res.json();
     return track;
   }
 
-
   async addTrack(track: iTrack): Promise<iTrack> {
-    const id = await this.createId();
-    const newTrack = { ...track, id };
+    const newTrack = { ...track };
     const res = await fetch(base_url, {
       method: 'POST',
       headers: {
@@ -25,16 +23,30 @@ export class TrackService {
       },
       body: JSON.stringify(newTrack),
     });
-    const parsed = await res.json();
-    return parsed;
+    const parsedResponse = await res.json();
+    return parsedResponse;
   }
 
-  private async createId(): Promise<number> {
-    const tracks = await this.getTracks();
-    const lastTrack = tracks[tracks.length - 1];
-    const id = Number(lastTrack.id) + 1;
-    return id;
+  async deleteTrackById(id: string): Promise<any> {
+    const res = await fetch(base_url + id, {
+      method: 'DELETE',
+    });
+    const parsedResponse = await res.json();
+    return parsedResponse;
   }
 
-
+  async updateTrackById(id: string, body: iTrack): Promise<void> {
+    const isTrack = await this.getTrackById(id);
+    if (!Object.keys(isTrack).length) return; //early return
+    const updatedTrack = { ...body, id };
+    const res = await fetch(base_url + id, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedTrack),
+    });
+    const parsedResponse = await res.json();
+    return parsedResponse;
+  }
 }
