@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -6,6 +7,9 @@ import {
   Post,
   Delete,
   Put,
+  HttpStatus,
+  Res,
+  HttpCode,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { iTrack } from './track.interface';
@@ -19,8 +23,21 @@ export class TrackController {
   }
 
   @Get(':id')
-  getTrackById(@Param('id') id: string): Promise<iTrack> {
-    return this.trackService.getTrackById(id);
+  async getTrackById(@Res() response, @Param('id') id: string): Promise<any> {
+    try {
+      const responseFromService = await this.trackService.getTrackById(id);
+      if (Object.keys(responseFromService).length) {
+        return response.status(HttpStatus.OK).json(responseFromService);
+      } else {
+        return response
+          .status(HttpStatus.NOT_FOUND)
+          .json({ error: 'track no existe' });
+      }
+    } catch (error) {
+      return response
+        .status(HttpStatus.NOT_FOUND)
+        .json({ error: 'el id de ese track no existe' });
+    }
   }
 
   @Post()
@@ -34,6 +51,7 @@ export class TrackController {
   }
 
   @Put(':id')
+  @HttpCode(204)
   updateTrackById(
     @Param('id') id: string,
     @Body() body: iTrack,
