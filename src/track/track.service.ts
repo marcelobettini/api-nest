@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { iTrack } from './track.interface';
 const base_url: string = 'http://localhost:3030/tracks/';
 @Injectable()
@@ -8,10 +8,14 @@ export class TrackService {
     const tracks = await res.json();
     return tracks;
   }
-  async getTrackById(id: string): Promise<iTrack> {
-    const res = await fetch(base_url + id);
-    const track = await res.json();
-    return track;
+  async getTrackById(id: number): Promise<iTrack> {
+    try {
+      const res = await fetch(base_url + id);
+      const track = await res.json();
+      return track;
+    } catch (error) {
+      throw new NotFoundException(`Track con id '${id}' no existe`);
+    }
   }
 
   async addTrack(track: iTrack): Promise<iTrack> {
@@ -27,7 +31,7 @@ export class TrackService {
     return parsedResponse;
   }
 
-  async deleteTrackById(id: string): Promise<any> {
+  async deleteTrackById(id: number): Promise<any> {
     const res = await fetch(base_url + id, {
       method: 'DELETE',
     });
@@ -35,7 +39,7 @@ export class TrackService {
     return parsedResponse;
   }
 
-  async updateTrackById(id: string, body: iTrack): Promise<void> {
+  async updateTrackById(id: number, body: iTrack): Promise<void> {
     const isTrack = await this.getTrackById(id);
     if (!Object.keys(isTrack).length) return; //early return
     const updatedTrack = { ...body, id };

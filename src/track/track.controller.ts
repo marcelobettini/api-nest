@@ -7,9 +7,9 @@ import {
   Post,
   Delete,
   Put,
-  HttpStatus,
-  Res,
   HttpCode,
+  HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { iTrack } from './track.interface';
@@ -23,21 +23,14 @@ export class TrackController {
   }
 
   @Get(':id')
-  async getTrackById(@Res() response, @Param('id') id: string): Promise<any> {
-    try {
-      const responseFromService = await this.trackService.getTrackById(id);
-      if (Object.keys(responseFromService).length) {
-        return response.status(HttpStatus.OK).json(responseFromService);
-      } else {
-        return response
-          .status(HttpStatus.NOT_FOUND)
-          .json({ error: 'track no existe' });
-      }
-    } catch (error) {
-      return response
-        .status(HttpStatus.NOT_FOUND)
-        .json({ error: 'el id de ese track no existe' });
-    }
+  async getTrackById(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+  ): Promise<any> {
+    return await this.trackService.getTrackById(id);
   }
 
   @Post()
@@ -46,14 +39,14 @@ export class TrackController {
   }
 
   @Delete(':id')
-  deleteTrackById(@Param('id') id: string) {
+  deleteTrackById(@Param('id') id: number) {
     return this.trackService.deleteTrackById(id);
   }
 
   @Put(':id')
   @HttpCode(204)
   updateTrackById(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() body: iTrack,
   ): Promise<void> {
     return this.trackService.updateTrackById(id, body);
